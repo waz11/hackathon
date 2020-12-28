@@ -24,7 +24,7 @@ def finish_wait():
 
 def main():
     wait_for_client()
-    print('done')
+    print('done for clients')
     game_mode()
 
 
@@ -36,7 +36,9 @@ def main():
 
 # server.shutdown(socket.SHUT_RDWR)
 
-
+all_clients = []
+group1_clients = []
+group2_clients = []
 def wait_for_client():
     global stop_thread
     print('Server started,listening on IP address 172.1.0.4')
@@ -48,10 +50,6 @@ def wait_for_client():
     server = socket.socket()
     server.bind(SERVER_ADDRESS)
     server.listen()
-
-    all_clients = []
-    group1_clients = []
-    group2_clients = []
 
     conn, addr = server.accept()
     print(f'New client: {addr}')
@@ -67,8 +65,26 @@ def wait_for_client():
 
 
 def game_mode():
-    print("Welcome to Keyboard Spamming Battle Royal")
-    # to be continue
+    message = "Welcome to Keyboard Spamming Battle Royale.\n"
+    message += "Group 1:\n"
+    message += "==\n"
+    for client in group1_clients:
+        message += client
+    message += "Group 2:\n"
+    message += "==\n"
+    for client in group2_clients:
+        message += client
+    message += "Start pressing keys on your keyboard as fast as you can!!\n"
+
+    s = socket.socket()
+    s.connect(CLIENT1_ADDRESS)
+    s.sendall(message.encode())
+
+    conn, addr = s.accept()
+    client_input = protocol_read_message(conn)
+    print(client_input)
+
+    s.close()
 
 
 if __name__ == '__main__':
