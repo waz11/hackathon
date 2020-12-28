@@ -38,6 +38,8 @@ def main():
 all_clients = []
 group1_clients = []
 group2_clients = []
+
+
 def wait_for_client():
     global stop_thread
     print('Server started,listening on IP address 172.1.0.4')
@@ -86,7 +88,7 @@ def game_mode():
     recieve_socket.listen()
     conn, addr = recieve_socket.accept()
     client_input = protocol_read_message(conn)
-    print(client_input)
+    print('get')
 
     recieve_socket.close()
 

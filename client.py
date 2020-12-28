@@ -1,5 +1,6 @@
 import socket
 from protocol import *
+from pynput.keyboard import Key, Listener
 
 
 def looking_for_server():
@@ -23,6 +24,7 @@ def connecting_to_server(team_name):
 
 def game_mode():
     s = socket.socket()
+    # s.connect(SERVER_ADDRESS)
     s.bind(CLIENT1_ADDRESS)
     s.listen()
 
@@ -31,8 +33,7 @@ def game_mode():
     print(message)
 
     while True:
-        inp = input()
-        s.send(inp.encode())
+        with Listener(on_press=lambda key: s.send(b'')) as listener: listener.join()
 
 
 def main():
