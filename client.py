@@ -11,7 +11,6 @@ def looking_for_server():
     if msg == b'offer':
         print(f'Received offer from {addr},attempting to connect...')
     s.close()
-    s.shutdown(socket.SHUT_RDWR)
 
 
 def connecting_to_server(team_name):
@@ -19,16 +18,12 @@ def connecting_to_server(team_name):
     s.connect(SERVER_ADDRESS)
     mes = team_name + "\n"
     s.sendall(mes.encode())
-    # data = s.recv(1024)
-    # print(f'Got from server: {data}')
-
-    # s.shutdown(socket.SHUT_RDWR)
     s.close()
 
 
 def game_mode():
     s = socket.socket()
-    s.bind(SERVER_ADDRESS)
+    s.bind(CLIENT1_ADDRESS)
     s.listen()
 
     conn, addr = s.accept()

@@ -24,7 +24,6 @@ def finish_wait():
 
 def main():
     wait_for_client()
-    print('done for clients')
     game_mode()
 
 
@@ -65,6 +64,7 @@ def wait_for_client():
 
 
 def game_mode():
+    print("starting game")
     message = "Welcome to Keyboard Spamming Battle Royale.\n"
     message += "Group 1:\n"
     message += "==\n"
@@ -76,15 +76,19 @@ def game_mode():
         message += client
     message += "Start pressing keys on your keyboard as fast as you can!!\n"
 
-    s = socket.socket()
-    s.connect(CLIENT1_ADDRESS)
-    s.sendall(message.encode())
+    send_socket = socket.socket()
+    send_socket.connect(CLIENT1_ADDRESS)
+    send_socket.sendall(message.encode())
+    send_socket.close()
 
-    conn, addr = s.accept()
+    recieve_socket = socket.socket()
+    recieve_socket.bind(SERVER_ADDRESS)
+    recieve_socket.listen()
+    conn, addr = recieve_socket.accept()
     client_input = protocol_read_message(conn)
     print(client_input)
 
-    s.close()
+    recieve_socket.close()
 
 
 if __name__ == '__main__':
