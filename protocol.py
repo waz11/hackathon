@@ -1,9 +1,12 @@
 import struct
+import ipaddress
 
 MESSAGE_FORMAT = struct.Struct('!I')
 IP = 'localhost'
-SERVER_ADDRESS = (IP, 1337)
-CLIENT1_ADDRESS = (IP, 7331)
+PORT_GAME = 13117
+SERVER_ADDRESS = ('172.1.0.35', 13117)
+CLIENT1_ADDRESS = ('localhost', 1300)
+CLIENT2_ADDRESS = (ipaddress.ip_address("10.0.0.7"), 13117)
 
 
 def protocol_write_message(sock, message):
@@ -13,9 +16,6 @@ def protocol_write_message(sock, message):
 
 
 def protocol_read_message(sock):
-    # metadata = sock.recv(MESSAGE_FORMAT.size)
-    # message_len = MESSAGE_FORMAT.unpack(metadata)[0]
-    # return sock.recv(message_len)
     metadata = sock.recv(1024)
     message = metadata.decode()
     return message
