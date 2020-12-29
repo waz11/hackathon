@@ -1,8 +1,9 @@
 import struct
 
 MESSAGE_FORMAT = struct.Struct('!I')
-SERVER_ADDRESS = ('127.0.0.1', 1337)
-CLIENT1_ADDRESS = ('127.0.0.1', 7331)
+IP = 'localhost'
+SERVER_ADDRESS = (IP, 1337)
+CLIENT1_ADDRESS = (IP, 7331)
 
 
 def protocol_write_message(sock, message):
