@@ -26,7 +26,9 @@ def send_offer(time_start_game):
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        s.sendto(b'offer', ('<broadcast>', 1300))
+        message = struct.pack('Ibh', MAGIC_COOKIE, MSG_TYPE, SERVER_PORT)
+        s.sendto(message, ('<broadcast>', 1300))
+
     t.start()
 
 

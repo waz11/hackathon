@@ -13,7 +13,7 @@ def create_socket(server_port):
     if socket_game is None:
         socket_game = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         socket_game.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        socket_game.bind(CLIENT2_ADDRESS)
+        socket_game.bind(CLIENT4_ADDRESS)
         socket_game.connect(('localhost', server_port))
 
 
@@ -77,7 +77,7 @@ def end_game():
 
 
 def main():
-    team_name = 'team 2'
+    team_name = 'team 4'
 
     print_client_msg("Client started, listening for offer requests...")
     s_port = receive_offer()

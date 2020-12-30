@@ -8,13 +8,13 @@ from prints import *
 socket_game = None
 
 
-def create_socket():
+def create_socket(server_port):
     global socket_game
     if socket_game is None:
         socket_game = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         socket_game.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         socket_game.bind(CLIENT1_ADDRESS)
-        socket_game.connect(SERVER_ADDRESS)
+        socket_game.connect(('localhost', server_port))
 
 
 def receive_offer():
@@ -23,9 +23,16 @@ def receive_offer():
         s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         s.bind(('', 1300))
         msg, addr = s.recvfrom(PORT_GAME)
-        if msg == b'offer':
+
+        msg_data = struct.unpack('Ibh', msg)
+        cookie = msg_data[0]
+        type = msg_data[1]
+
+        if cookie == MAGIC_COOKIE or type == MSG_TYPE and msg_data[2]:
             print_client_msg(
                 f'Received offer from {addr},attempting to connect...')
+            s_port = msg_data[2]
+            return s_port
         else:
             receive_offer()
 
@@ -73,8 +80,8 @@ def main():
     team_name = 'team 1'
 
     print_client_msg("Client started, listening for offer requests...")
-    receive_offer()
-    create_socket()
+    s_port = receive_offer()
+    create_socket(s_port)
     send_team_name(team_name)
     game_mode()
     end_game()
