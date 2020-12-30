@@ -16,11 +16,8 @@ score_client = {
 threads_start=[]
 threads_end = []
 
-global time_start_game
-
-def send_offer():
-    global time_start_game
-    t = threading.Timer(1.0, send_offer)
+def send_offer(time_start_game):
+    t = threading.Timer(1.0, send_offer,[time_start_game])
     if time.time() > time_start_game:
         t.cancel()
         return
@@ -44,8 +41,8 @@ def handle_client(conn, addr):
         group2_clients.append((addr, team_name))
 
 
-def wait_for_client():
-    global group2_clients, group1_clients, connections, time_start_game
+def wait_for_client(time_start_game):
+    global group2_clients, group1_clients, connections
     print("start wait for client")
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(SERVER_ADDRESS)
@@ -142,32 +139,34 @@ def game_mode():
     for t in threads_end:
         t.start()
     print('​Game over, sending out offer requests...​')
-    main()
 
 def close_threads():
-    global threads_start,threads_end,score_client,group1_clients,group2_clients
+    global threads_start,threads_end,score_client,group1_clients,group2_clients,connections
     for t in threads_start:
-        t.kill()
         t.join()
     for t in threads_end:
-        t.kill()
         t.join()
     score_client['group_1']=0
     score_client['group_2']=0
+    connections = []
     group1_clients = []
     group2_clients = []
 
 def main():
-    global time_start_game
+    global group1_clients, group2_clients
     close_threads()
     print("Server started, listening on IP address 172.1.0.4")
     now = time.time()
     time_start_game = now + 10
-    send_offer()
-    wait_for_client()
+    send_offer(time_start_game)
+    wait_for_client(time_start_game)
     while time.time() < time_start_game:
         None
-    game_mode()
+    if len(group1_clients) != 0 or len(group2_clients) != 0:
+        game_mode()
+    else:
+        print('There are no connected cliets. retry ....\n')
+    main()
 
 
 if __name__ == '__main__':

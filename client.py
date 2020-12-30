@@ -24,6 +24,8 @@ def receive_offer():
         msg, addr = s.recvfrom(PORT_GAME)
         if msg == b'offer':
             print(f'Received offer from {addr},attempting to connect...')
+        else :
+            receive_offer()
 
 
 def send_team_name(team):
@@ -49,20 +51,31 @@ def game_mode():
             kb = KBHit()
             send_press()
         
+def close_connections():
+    global socket_game
+    socket_game.shutdown(socket.SHUT_RDWR)
+    socket_game.close()
+    socket_game = None
+
 def end_game():
     mes = protocol_read_message(socket_game)
     print(mes)
+    close_connections()
+    time.sleep(2)
+    main()
+
 
 
 def main():
     team_name = 'team 1'
+    
     print("Client started, listening for offer requests...")
     receive_offer()
     create_socket()
     send_team_name(team_name)
     game_mode()
     end_game()
-    main()
+ 
 
 
 if __name__ == '__main__':
