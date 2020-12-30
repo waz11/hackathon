@@ -4,6 +4,7 @@ import time
 from protocol import *
 from random import randrange
 from threading import Thread
+import sys
 
 group1_clients = []
 group2_clients = []
@@ -12,8 +13,10 @@ score_client = {
     "group_1": 0,
     "group_2": 0,
 }
-global time_start_game
+threads_start=[]
+threads_end = []
 
+global time_start_game
 
 def send_offer():
     global time_start_game
@@ -81,10 +84,9 @@ def add_score(add):
         print('address not playing...')
 
 
-def start_client_game(con,end_game):
+def start_client_game(con,end_game,msg):
     con, add = con[0], con[1]
-    start_msg = get_start_msg()
-    con.send(start_msg.encode())
+    con.send(msg.encode())
     while time.time() < end_game:
         if time.time()>end_game:
             return
@@ -95,6 +97,7 @@ def start_client_game(con,end_game):
 def end_client_game(con,msg):
     con = con[0]
     con.send(msg.encode())
+    con.close()
     
 
 def get_end_game_msg():
@@ -119,22 +122,44 @@ def get_end_game_msg():
 
 
 def game_mode():
-    global connections
+    global connections,threads_start,threads_end
     time_begin = time.time()
     time_end = time_begin +10
     print("Start Game")
+    start_msg = get_start_msg()
+    threads_start = [] 
     for con in connections:
-        Thread(target=start_client_game, args=[con,time_end]).start()
+        threads_start.append(Thread(target=start_client_game, args=[con,time_end,start_msg]))
+    for t in threads_start:
+        t.start()
     while time.time()<time_end:
         None
     print("Ending Game!")
     end_msg = get_end_game_msg()
+    threads_end = [] 
     for con in connections:
-        Thread(target=end_client_game, args=[con,end_msg]).start()
+       threads_end.append(Thread(target=end_client_game, args=[con,end_msg]))
+    for t in threads_end:
+        t.start()
+    print('​Game over, sending out offer requests...​')
+    main()
 
+def close_threads():
+    global threads_start,threads_end,score_client,group1_clients,group2_clients
+    for t in threads_start:
+        t.kill()
+        t.join()
+    for t in threads_end:
+        t.kill()
+        t.join()
+    score_client['group_1']=0
+    score_client['group_2']=0
+    group1_clients = []
+    group2_clients = []
 
 def main():
     global time_start_game
+    close_threads()
     print("Server started, listening on IP address 172.1.0.4")
     now = time.time()
     time_start_game = now + 10

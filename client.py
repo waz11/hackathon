@@ -62,6 +62,7 @@ def main():
     send_team_name(team_name)
     game_mode()
     end_game()
+    main()
 
 
 if __name__ == '__main__':
