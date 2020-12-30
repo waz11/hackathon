@@ -3,6 +3,7 @@ from protocol import *
 import getch
 import time
 from kbhit import KBHit
+from prints import *
 
 socket_game = None
 
@@ -23,7 +24,10 @@ def receive_offer():
         s.bind(('', 1300))
         msg, addr = s.recvfrom(PORT_GAME)
         if msg == b'offer':
-            print(f'Received offer from {addr},attempting to connect...')
+            print_client_msg(
+                f'Received offer from {addr},attempting to connect...')
+        else:
+            receive_offer()
 
 
 def send_team_name(team):
@@ -39,24 +43,36 @@ def send_press(*args):
 def game_mode():
     global socket_game
     mes = protocol_read_message(socket_game)
-    end_time  = time.time()+10
-    print(mes)
-    
+    end_time = time.time() + 10
+    print_game_mode(mes)
+
     kb = KBHit()
-    while time.time()<end_time:
+    while time.time() < end_time:
         if kb.kbhit():
             kb.set_normal_term()
             kb = KBHit()
             send_press()
-        
+
+
+def close_connections():
+    global socket_game
+    socket_game.shutdown(socket.SHUT_RDWR)
+    socket_game.close()
+    socket_game = None
+
+
 def end_game():
     mes = protocol_read_message(socket_game)
-    print(mes)
+    print_end_game_mode(mes)
+    close_connections()
+    time.sleep(2)
+    main()
 
 
 def main():
-    team_name = 'team 1'
-    print("Client started, listening for offer requests...")
+    team_name = 'team 2'
+
+    print_client_msg("Client started, listening for offer requests...")
     receive_offer()
     create_socket()
     send_team_name(team_name)
