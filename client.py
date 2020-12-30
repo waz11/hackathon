@@ -1,6 +1,8 @@
 import socket
 from protocol import *
 import getch
+import time
+from kbhit import KBHit
 
 socket_game = None
 
@@ -31,21 +33,25 @@ def send_team_name(team):
 
 def send_press(*args):
     global socket_game
-    print(' sending')
     socket_game.send(b'key')
 
 
 def game_mode():
     global socket_game
-
+    mes = protocol_read_message(socket_game)
+    end_time  = time.time()+10
+    print(mes)
+    
+    kb = KBHit()
+    while time.time()<end_time:
+        if kb.kbhit():
+            kb.set_normal_term()
+            kb = KBHit()
+            send_press()
+        
+def end_game():
     mes = protocol_read_message(socket_game)
     print(mes)
-    while True:
-        try:
-            k = getch.getch()
-            send_press()
-        except getch.getche():
-            print("typing...")
 
 
 def main():
@@ -55,6 +61,7 @@ def main():
     create_socket()
     send_team_name(team_name)
     game_mode()
+    end_game()
 
 
 if __name__ == '__main__':

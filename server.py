@@ -24,7 +24,6 @@ def send_offer():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        print('sending msg')
         s.sendto(b'offer', ('<broadcast>', 1300))
     t.start()
 
@@ -82,22 +81,56 @@ def add_score(add):
         print('address not playing...')
 
 
-def start_client_game(con):
+def start_client_game(con,end_game):
     con, add = con[0], con[1]
     start_msg = get_start_msg()
     con.send(start_msg.encode())
-    while True:
+    while time.time() < end_game:
+        if time.time()>end_game:
+            return
         ms = con.recv(1024)
-        print('adding score ', add)
         add_score(add)
-        print(score_client)
+    
+
+def end_client_game(con,msg):
+    con = con[0]
+    con.send(msg.encode())
+    
+
+def get_end_game_msg():
+    global group1_clients, group2_clients, score_client
+    mesg = 'Game over!\n'
+    mesg += f'Group 1 typed in {score_client["group_1"]} characters. Group 2 typed in {score_client["group_2"]} characters.\n'
+    if score_client["group_1"] < score_client["group_2"]:
+        mesg += 'Group 2 wins!\n\n'
+        mesg += 'Congratulations to the winners:\n'
+        mesg += '==\n'
+        for client in group2_clients:
+            mesg += client[1] + '\n'
+    elif score_client["group_1"] > score_client["group_2"]:
+        mesg += 'Group 1 wins!\n\n'
+        mesg += 'Congratulations to the winners:\n'
+        mesg += '==\n'
+        for client in group1_clients:
+            mesg += client[1] + '\n'
+    else:
+        mesg += 'its a tie!\n'
+    return mesg
 
 
 def game_mode():
     global connections
-    print("start Game")
+    time_begin = time.time()
+    time_end = time_begin +10
+    print("Start Game")
     for con in connections:
-        Thread(target=start_client_game, args=[con]).start()
+        Thread(target=start_client_game, args=[con,time_end]).start()
+    while time.time()<time_end:
+        None
+    print("Ending Game!")
+    end_msg = get_end_game_msg()
+    for con in connections:
+        Thread(target=end_client_game, args=[con,end_msg]).start()
 
 
 def main():
