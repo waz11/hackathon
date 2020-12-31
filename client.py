@@ -2,7 +2,7 @@ import socket
 from protocol import *
 import getch
 import time
-from kbhit import KBHit
+from KBHit import KBHit
 from prints import *
 
 socket_game = None
@@ -52,9 +52,9 @@ def game_mode():
     mes = protocol_read_message(socket_game)
     end_time = time.time() + 10
     print_game_mode(mes)
-
     kb = KBHit()
     while time.time() < end_time:
+        time.sleep(0.5)
         if kb.kbhit():
             kb.set_normal_term()
             kb = KBHit()
@@ -63,7 +63,6 @@ def game_mode():
 
 def close_connections():
     global socket_game
-    socket_game.shutdown(socket.SHUT_RDWR)
     socket_game.close()
     socket_game = None
 

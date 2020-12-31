@@ -40,7 +40,7 @@ def handle_client(conn, addr):
     team_name = protocol_read_message(conn)
     print("received message from client:", team_name)
     rnd = randrange(10)
-    if rnd % 2 == 0:
+    if len(group2_clients) > len(group1_clients):
         group1_clients.append((addr, team_name))
     else:
         group2_clients.append((addr, team_name))
@@ -90,6 +90,7 @@ def start_client_game(con, end_game, msg):
     con, add = con[0], con[1]
     con.send(msg.encode())
     while time.time() < end_game:
+        # time.sleep(10)
         if time.time() > end_game:
             return
         ms = con.recv(1024)
@@ -135,8 +136,11 @@ def game_mode():
             Thread(target=start_client_game, args=[con, time_end, start_msg]))
     for t in threads_start:
         t.start()
-    while time.time() < time_end:
-        None
+    threading.Timer(10, end_game_2).start()
+
+
+def end_game_2():
+    global connections
     print_game_mode('Ending Game!')
     end_msg = get_end_game_msg()
     threads_end = []
@@ -168,8 +172,7 @@ def main():
     time_start_game = now + 10
     send_offer(time_start_game)
     wait_for_client(time_start_game)
-    while time.time() < time_start_game:
-        None
+    time.sleep(5)
     if len(group1_clients) != 0 or len(group2_clients) != 0:
         game_mode()
     else:
